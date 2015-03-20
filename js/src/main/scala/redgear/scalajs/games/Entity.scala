@@ -1,0 +1,13 @@
+package redgear.scalajs.games
+
+import org.scalajs.dom
+
+/**
+ * Created by Jett on 3/19/2015.
+ */
+trait Entity {
+
+   def step: List[Entity]
+
+   def draw(drawContext: dom.CanvasRenderingContext2D)
+ }

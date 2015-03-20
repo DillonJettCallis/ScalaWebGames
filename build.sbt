@@ -4,8 +4,9 @@ import com.lihaoyi.workbench.Plugin._
 import sbt.Keys._
 import spray.revolver.RevolverPlugin.Revolver
 
-val example = crossProject.settings(
-  scalaVersion := "2.11.4",
+val example = crossProject.in(file(".")).settings(
+  name := "ScalaWebGames",
+  scalaVersion := "2.11.6",
   version := "0.1-SNAPSHOT",
   libraryDependencies ++= Seq(
     "com.lihaoyi" %%% "upickle" % "0.2.6",
