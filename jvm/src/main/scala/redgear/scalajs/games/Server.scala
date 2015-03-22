@@ -25,10 +25,8 @@ object Template{
         )
       ),
       body(margin:=0)(
-        div (textAlign.center,
           canvas(id:=canvasId),
-          script(s"redgear.scalajs.games.GameBreakout().main(document.getElementById('$canvasId'))")
-        )
+          script(s"window.onload = function(){redgear.scalajs.games.GameBreakout().main(document.getElementById('$canvasId'))}")
       )
     )
 }

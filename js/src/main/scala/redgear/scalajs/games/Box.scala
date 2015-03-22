@@ -1,6 +1,7 @@
 package redgear.scalajs.games
 
 import org.scalajs.dom
+import redgear.scalajs.games.Point.toPoint
 
 /**
  * Created by LordBlackHole on 3/19/2015.
@@ -18,7 +19,7 @@ trait Box extends Entity {
 
   def width = size.x
   def height = size.y
-  def center = location + (size / 2)
+  def center = location + (size / 2.0)
 
   def color: String
 
