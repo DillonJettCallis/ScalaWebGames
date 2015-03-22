@@ -8,12 +8,13 @@ import spray.http.{MediaTypes, HttpEntity}
 
 object Template{
 
+  val canvasId = "gamespace"
 
   val txt =
     "<!DOCTYPE html>" +
     html(
       head(
-        title("Example Scala.js application"),
+        title("Scala.js Breakout"),
         meta(httpEquiv:="Content-Type", content:="text/html; charset=UTF-8"),
         script(`type`:="text/javascript", src:="/client-fastopt.js"),
         script(`type`:="text/javascript", src:="//localhost:12345/workbench.js"),
@@ -24,7 +25,10 @@ object Template{
         )
       ),
       body(margin:=0)(
-        script("redgear.scalajs.games.GameBreakout().main()")
+        div (textAlign.center,
+          canvas(id:=canvasId),
+          script(s"redgear.scalajs.games.GameBreakout().main(document.getElementById('$canvasId'))")
+        )
       )
     )
 }
