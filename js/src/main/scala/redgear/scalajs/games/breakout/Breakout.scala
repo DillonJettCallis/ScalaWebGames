@@ -90,27 +90,27 @@ case class Paddle(location: Point) extends Box{
 
   def step: List[Entity] = {
 
-    if(mouseIn()){
-      val temp = mouseScaleLoc().x - size.x / 2
+    if(GameBreakout.mouseIn()){
+      val temp = GameBreakout.mouseScaleLoc().x - size.x / 2
 
-      val x = if(temp > scaleX - size.x) scaleX - size.x else if(temp < 0) 0 else temp
+      val x = if(temp > GameBreakout.scaleX - size.x) GameBreakout.scaleX - size.x else if(temp < 0) 0 else temp
 
-      Paddle(location.copy(x = x))
+      Paddle(location.copy(x = x)) :: Nil
     }
     else {
 
       def left = if (location.x - speed > 0) Point(-speed, 0) else Point(0, 0)
-      def right = if (location.x + speed < scaleX - size.x) Point(speed, 0) else Point(0, 0)
+      def right = if (location.x + speed < GameBreakout.scaleX - size.x) Point(speed, 0) else Point(0, 0)
 
-      if (GameBreakout.keysDown(65)) Paddle(location + left)
+      if (GameBreakout.keysDown(65)) Paddle(location + left) :: Nil
       else //A
-      if (GameBreakout.keysDown(37)) Paddle(location + left)
+      if (GameBreakout.keysDown(37)) Paddle(location + left) :: Nil
       else //left arrow
-      if (GameBreakout.keysDown(68)) Paddle(location + right)
+      if (GameBreakout.keysDown(68)) Paddle(location + right) :: Nil
       else //D
-      if (GameBreakout.keysDown(39)) Paddle(location + right)
+      if (GameBreakout.keysDown(39)) Paddle(location + right) :: Nil
       else //right arrow
-        this //No keys were pressed. Don't move.
+        this :: Nil //No keys were pressed. Don't move.
 
     }
   }
@@ -138,10 +138,10 @@ case class Ball(location: Point, velocity: Point) extends Box {
     @tailrec
     def collideRecurse(entities: List[Entity]): List[Entity] = {
       entities match {
-        case ::(head: Block, tail) => if(next | head) calcBlockCollision(head) else collideRecurse(tail)
-        case ::(head: Paddle, tail) => if(next | head) calcPaddleCollision(head) else collideRecurse(tail)
+        case ::(head: Block, tail) => if(next | head) calcBlockCollision(head) :: Nil else collideRecurse(tail)
+        case ::(head: Paddle, tail) => if(next | head) calcPaddleCollision(head) :: Nil else collideRecurse(tail)
         case _ :: tail => collideRecurse(tail)
-        case Nil => next
+        case Nil => next :: Nil
       }
     }
 
@@ -173,7 +173,7 @@ case class Ball(location: Point, velocity: Point) extends Box {
     }
 
     if(checkWalls)
-      bounce(checkX, checkY)
+      bounce(checkX, checkY) :: Nil
     else
       collideRecurse(GameBreakout.gameObjects)
   }
@@ -190,7 +190,7 @@ case class Block(location: Point, color: String) extends Box {
       entities match {
         case ::(head: Ball, tail) => if(this | head) {Score.update(1); Nil} else collideRecurse(tail)
         case _ :: tail => collideRecurse(tail)
-        case Nil => this
+        case Nil => this :: Nil
       }
     }
     collideRecurse(GameBreakout.gameObjects)
@@ -222,7 +222,7 @@ object Score extends Entity {
     combo = 0
   }
 
-  override def step: List[Entity] = this
+  override def step: List[Entity] = this :: Nil
 
   val max = 200
   val font = "px Georgia"
