@@ -6,7 +6,7 @@ import spray.routing.SimpleRoutingApp
 import akka.actor.ActorSystem
 import spray.http.{MediaTypes, HttpEntity}
 
-object Template{
+object Template {
 
   val canvasId = "gamespace"
 
@@ -26,11 +26,13 @@ object Template{
       ),
       body(margin:=0)(
           canvas(id:=canvasId),
-          script(s"window.onload = function(){redgear.scalajs.games.breakout.GameBreakout().main(document.getElementById('$canvasId'))}")
+          script(s"window.onload = function(){redgear.scalajs.games.asteroids.GameAsteroids().main(document.getElementById('$canvasId'))}")
       )
     )
 }
-object Server extends SimpleRoutingApp{
+
+
+object Server extends SimpleRoutingApp {
   def main(args: Array[String]): Unit = {
     implicit val system = ActorSystem()
     startServer("0.0.0.0", port = 8080) {

@@ -30,7 +30,11 @@ trait Shape{
 }
 
 
-case class Box(location: Point, size: Point) extends Shape {
+trait Box extends Shape {
+
+  def location: Point
+
+  def size: Point
 
   def left = location.x
   def top = location.y

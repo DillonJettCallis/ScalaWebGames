@@ -24,7 +24,7 @@ trait Box extends Entity {
 
   def draw(drawContext: dom.CanvasRenderingContext2D, scale: Point) = {
     drawContext.fillStyle = color
-    drawContext.fillRect(left * scale.x, top * scale.y, size.x * scale.x, size.y * scale.y)
+    drawContext.fillRect(left * scale.x, top * scale.y, width * scale.x, height * scale.y)
   }
 
   def |(other: Box): Boolean = horizontal(other) && vertical(other)

@@ -1,8 +1,13 @@
-// Turn this project into a Scala.js project by importing these settings
-
 import com.lihaoyi.workbench.Plugin._
 import sbt.Keys._
 import spray.revolver.RevolverPlugin.Revolver
+
+// Turn this project into a Scala.js project by importing these settings
+lazy val root = project.enablePlugins(ScalaJSPlugin)
+
+
+val scalazVersion = "7.1.2"
+val monocleVersion = "1.1.1"
 
 val example = crossProject.in(file(".")).settings(
   name := "ScalaWebGames",
@@ -19,7 +24,10 @@ val example = crossProject.in(file(".")).settings(
 ).jsSettings(
   name := "Client",
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.8.0"
+    "org.scala-js" %%% "scalajs-dom" % "0.8.0",
+    "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % scalazVersion,
+    "com.github.japgolly.fork.monocle" %%% "monocle-core" % monocleVersion,
+    "com.github.japgolly.fork.monocle" %%% "monocle-macro" % monocleVersion
   ),
   bootSnippet := "example.ScalaJSExample().main();"
 ).jvmSettings(
@@ -30,9 +38,14 @@ val example = crossProject.in(file(".")).settings(
     "io.spray" %% "spray-can" % "1.3.1",
     "io.spray" %% "spray-routing" % "1.3.1",
     "com.typesafe.akka" %% "akka-actor" % "2.3.2",
-    "org.webjars" % "bootstrap" % "3.2.0"
+    "org.webjars" % "bootstrap" % "3.2.0",
+    "org.scalaz" %% "scalaz-core" % scalazVersion,
+    "com.github.julien-truffaut" %%  "monocle-core" % monocleVersion,
+    "com.github.julien-truffaut"  %%  "monocle-macro"   % monocleVersion
   )
 )
+
+addCompilerPlugin(compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
 
 val exampleJS = example.js
 val exampleJVM = example.jvm.settings(
