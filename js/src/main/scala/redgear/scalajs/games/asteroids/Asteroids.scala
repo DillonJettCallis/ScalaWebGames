@@ -1,6 +1,7 @@
 package redgear.scalajs.games.asteroids
 
 import org.scalajs.dom.CanvasRenderingContext2D
+import org.scalajs.dom.ext.KeyCode
 import org.scalajs.dom.html._
 import redgear.scalajs.games.asteroids.Engine._
 import redgear.scalajs.games.asteroids.DrawingUtils._
@@ -17,25 +18,21 @@ import scalaz.State
 @JSExport
 object GameAsteroids {
 
+  val scale = Point(1000, 600)
 
-  val scaleX: Double = 1000
-  val scaleY: Double = 600
-  val scale = Point(scaleX, scaleY)
-
-  val randomGen = new Random()
+  val randomGen = new Random
 
   @JSExport
   /** The game window is where all objects are rendered **/
   def main(window: Canvas): Unit = {
     val ship = Ship(
-      location = Point(500, 300),
-      direction = 0
+      location = Point(500, 300)
     )
 
     val asteroids = for (i <- 0 to 4)
       yield Asteroid(
-        location = Point(randomGen.nextInt(scaleX.toInt), randomGen.nextInt(scaleY.toInt)),
-        velocity = Point(randomGen.nextInt(4) - 2, randomGen.nextInt(4) - 2),
+        location = Point(randomGen.nextDouble(), randomGen.nextDouble()) * scale,
+        velocity = Point(randomGen.nextDouble(), randomGen.nextDouble()) * Point(4, 4) - Point(2, 2),
         size = randomGen.nextInt(20) + 8
       )
 
@@ -46,7 +43,7 @@ object GameAsteroids {
       eventHandlers =     ShipControlHandler :: Nil
     ).buildGame(
         window =          window,
-        scale =           Point(scaleX, scaleY),
+        scale =           scale,
         backgroundColor = "black")
   }
 
@@ -56,7 +53,8 @@ object GameAsteroids {
 
 
 
-case class Ship(location: Point, direction: Double = 0, velocity: Point = Point(0, 0), fireCountDown: Int = 0, turnedFlag: Boolean = false, movedFlag: Boolean = false) extends Entity
+case class Ship(location: Point, direction: Double = 0, velocity: Point = Point(0, 0), controlFlags: ShipControlFlags = ShipControlFlags()) extends Entity
+case class ShipControlFlags(fireCountDown: Int = 0, turnedFlag: Boolean = false, movedFlag: Boolean = false)
 
 object ShipBehavior extends Behavior {
 
@@ -70,8 +68,7 @@ object ShipBehavior extends Behavior {
   private def move(input: Ship): Ship = {
     input.copy(
       location = GameAsteroids.wrapAround(input.location + input.velocity),
-      turnedFlag = false,
-      movedFlag = false
+      controlFlags = ShipControlFlags()
     )
   }
 }
@@ -82,7 +79,7 @@ object ShipArtist extends Artist {
     val h = 30
     val w = 20
 
-    Seq(
+    List(
       Point(h / 2, 0),
       Point(-h / 2, -w / 2),
       Point(-h / 2, w / 2)
@@ -92,7 +89,7 @@ object ShipArtist extends Artist {
   override def draw(world: World, drawContext: CanvasRenderingContext2D, scale: Point): Unit = {
     drawContext.fillStyle = "white"
 
-    for (Ship(loc, direct, _, _, _, _) <- world.entities){
+    for (Ship(loc, direct, _, _) <- world.entities){
       drawContext.renderPathWithPoints(scale)(points.map(_.rotate(direct) + loc))
     }
   }
@@ -105,24 +102,24 @@ object ShipControlHandler extends EventHandler {
 
   override def react(event: Event): WorldState[Unit] = State.modify{ world =>
     event match {
-      case KeyPressEvent(65) | KeyPressEvent(37) => turn(world, -turnArc) //A or Left Arrow
-      case KeyPressEvent(68) | KeyPressEvent(39) => turn(world, turnArc) //D or Right Arrow
-      case KeyPressEvent(87) | KeyPressEvent(38) => accelerate(world, acceleration) //W or Up Arrow
-      case KeyPressEvent(83) | KeyPressEvent(40) => accelerate(world, acceleration * -1) //S or Down Arrow
+      case KeyPressEvent(KeyCode.a) | KeyPressEvent(KeyCode.left) => turn(world, -turnArc) //A or Left Arrow
+      case KeyPressEvent(KeyCode.d) | KeyPressEvent(KeyCode.right) => turn(world, turnArc) //D or Right Arrow
+      case KeyPressEvent(KeyCode.w) | KeyPressEvent(KeyCode.up) => accelerate(world, acceleration) //W or Up Arrow
+      case KeyPressEvent(KeyCode.s) | KeyPressEvent(KeyCode.down) => accelerate(world, acceleration * -1) //S or Down Arrow
       case other: Event => world
     }
   }
 
   def turn(world: World, turnArc: Double): World = {
     World.lensEntities.modify(_.collect{
-      case ship: Ship if !ship.turnedFlag => ship.copy(direction = ship.direction + turnArc, turnedFlag = true)
+      case ship: Ship if !ship.controlFlags.turnedFlag => ship.copy(direction = ship.direction + turnArc, controlFlags = ship.controlFlags.copy(turnedFlag = true))
       case other: Entity => other
     })(world)
   }
 
   def accelerate(world: World, a: Point): World = {
     World.lensEntities.modify(_.collect{
-      case ship: Ship if !ship.movedFlag => ship.copy(velocity = ship.velocity + a.rotate(ship.direction), movedFlag = true)
+      case ship: Ship if !ship.controlFlags.movedFlag => ship.copy(velocity = ship.velocity + a.rotate(ship.direction), controlFlags = ship.controlFlags.copy(movedFlag = true))
       case other: Entity => other
     })(world)
   }
