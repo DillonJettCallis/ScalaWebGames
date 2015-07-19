@@ -6,6 +6,7 @@ import org.scalajs.dom.html._
 import redgear.scalajs.games.asteroids.Engine._
 import rx._
 
+import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
 import scala.util.Random
 import scalaz.{State, Lens}
@@ -21,77 +22,31 @@ object GameAsteroids {
   val scaleX: Double = 1000
   val scaleY: Double = 600
 
-  val width = Var(scaleX)
-  val height = Var(scaleY)
-
-  val drawScale = Rx{Point(width() / scaleX, height() / scaleY)}
-
-  val mouseIn = Var(false)
-  val mouseLoc = Var(Point(0, 0))
-  val mouseScaleLoc = Rx{mouseLoc() / drawScale()}
-
   val randomGen = new Random()
-
-  val keysDown = collection.mutable.Set.empty[Int]
-
-  val currentGame = newGame
-
-  def run(): Unit = {
-    currentGame.tick(1)
-  }
-
-  def draw(drawContext: dom.CanvasRenderingContext2D): Unit = {
-    drawContext.fillStyle = "black"
-    drawContext.fillRect(0, 0, width(), height())
-    currentGame.draw(drawContext, drawScale())
-  }
-
-  def newGame: Game = {
-    val ship = Ship(Point(500, 300), 0, 0, 0)
-
-    val asteroids = for (i <- 0 to 4) yield Asteroid(Point(randomGen.nextInt(scaleX.toInt), randomGen.nextInt(scaleY.toInt)), Point(randomGen.nextInt(4) - 2, randomGen.nextInt(4) - 2), randomGen.nextInt(20) + 8)
-
-    GameBuider(ship :: asteroids.toList,
-      ShipBehavior :: AsteroidBehavior :: Nil,
-      ShipArtist :: AsteroidArtist :: Nil
-    ).buildGame
-  }
 
   @JSExport
   /** The game window is where all objects are rendered **/
   def main(window: Canvas): Unit = {
+    val ship = Ship(Point(500, 300), 0, 0, 0)
 
-    /** Drawing context for the window **/
-    val drawContext = window.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
+    val asteroids = for (i <- 0 to 4)
+      yield Asteroid(Point(randomGen.nextInt(scaleX.toInt), randomGen.nextInt(scaleY.toInt)), Point(randomGen.nextInt(4) - 2, randomGen.nextInt(4) - 2), randomGen.nextInt(20) + 8)
 
-    val resize = () => {width() = dom.innerWidth - 20; height() = dom.innerHeight - 20}
-
-    Obs(width){window.width = width().toInt}
-    Obs(height){window.height = height().toInt}
-
-    dom.document.body.appendChild(window)
-
-    dom.onkeydown = (e: dom.KeyboardEvent) => keysDown.add(e.keyCode)
-    dom.onkeyup   = (e: dom.KeyboardEvent) => keysDown.remove(e.keyCode)
-    dom.onresize = (e: dom.UIEvent) => resize()
-
-    dom.onmouseover = (e: dom.MouseEvent) => mouseIn() = true
-    dom.onmouseout = (e: dom.MouseEvent) => mouseIn() = false
-
-    dom.onmousemove = (e: dom.MouseEvent) => mouseLoc() = Point(e.pageX, e.pageY)
-
-    resize()
-
-    dom.setInterval(() => {run(); draw(drawContext)}, 20)
+    GameBuider(
+      startingEntities =  ship :: asteroids.toList,
+      behaviors =         ShipBehavior :: AsteroidBehavior :: Nil,
+      artists =           ShipArtist :: AsteroidArtist :: Nil,
+      eventHandlers =     ShipControlHandler :: Nil
+    ).buildGame(
+        window =          window,
+        scale =           Point(scaleX, scaleY),
+        backgroundColor = "black")
   }
 }
 
 
 
-case class Ship(location: Point, direction: Double, speed: Double, fireCountDown: Int) extends Entity {
-
-  val isSolid = true
-}
+case class Ship(location: Point, direction: Double, speed: Double, fireCountDown: Int) extends Entity
 
 object ShipBehavior extends Behavior {
 
@@ -103,26 +58,63 @@ object ShipBehavior extends Behavior {
   }
 
   //TODO: Actual movement code
-  private def move(input: Ship): Ship = input
-  
-  
+  private def move(input: Ship): Ship = {
+
+
+
+    input
+  }
 }
 
 object ShipArtist extends Artist {
+
+  val h = 30
+  val w = 20
+
   override def draw(world: World, drawContext: CanvasRenderingContext2D, scale: Point): Unit = {
     drawContext.fillStyle = "white"
 
-    for (Ship(Point(x, y), direct, _, _) <- world.entities){
-      //TODO: Actual draw code
-      drawContext.fillRect(x * scale.x, y * scale.y, 10 * scale.x, 10 * scale.y)
+    for (Ship(loc, direct, _, _) <- world.entities){
+      val translated = loc * scale
+      drawContext.save()
+      drawContext.translate(translated.x, translated.y)
+      drawContext.beginPath()
+      drawContext.rotate(direct * js.Math.PI / 180)
+      drawContext.beginPath()
+      drawContext.moveTo(0, -h / 2)
+      drawContext.lineTo(w / 2, h / 2)
+      drawContext.lineTo(-w / 2, h / 2)
+      drawContext.lineTo(0, -h / 2)
+      drawContext.fill()
+      drawContext.closePath()
+      drawContext.restore()
     }
   }
 }
 
-case class Asteroid(location: Point, direction: Point, size: Double) extends Entity {
+object ShipControlHandler extends EventHandler {
 
-  val isSolid = true
+  val turnArc = 10
+
+  override def react(event: Event): WorldState[Unit] = State.modify{ world =>
+    event match {
+      case KeyPressEvent(65) => turn(world, -turnArc) //A
+      case KeyPressEvent(37) => turn(world, -turnArc) //Left Arrow
+      case KeyPressEvent(68) => turn(world, turnArc) //D
+      case KeyPressEvent(39) => turn(world, turnArc) //Right Arrow
+      case other: Event => world
+    }
+  }
+
+  def turn(world: World, turnArc: Int): World = {
+    World.lensEntities.modify(_.collect{
+      case ship: Ship => ship.copy(direction = ship.direction + turnArc)
+      case other: Entity => other
+    })(world)
+  }
 }
+
+case class Asteroid(location: Point, direction: Point, size: Double) extends Entity
 
 object AsteroidBehavior extends Behavior {
 
@@ -153,7 +145,7 @@ object AsteroidArtist extends Artist {
 
     for (Asteroid(Point(x, y), _, size) <- world.entities){
       drawContext.beginPath()
-      drawContext.arc(x * scale.x, y * scale.y, size * scale.x, 0, scala.scalajs.js.Math.PI * 2)
+      drawContext.arc(x * scale.x, y * scale.y, size * scale.x, 0, js.Math.PI * 2)
       drawContext.closePath()
       drawContext.fill()
     }
