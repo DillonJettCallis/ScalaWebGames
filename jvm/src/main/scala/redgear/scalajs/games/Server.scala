@@ -14,7 +14,7 @@ object Template {
     "<!DOCTYPE html>" +
     html(
       head(
-        title("Scala.js Breakout"),
+        title("Scala.js Aseroids"),
         meta(httpEquiv:="Content-Type", content:="text/html; charset=UTF-8"),
         script(`type`:="text/javascript", src:="/client-fastopt.js"),
         script(`type`:="text/javascript", src:="//localhost:12345/workbench.js"),
