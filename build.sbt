@@ -29,8 +29,7 @@ val example = crossProject.in(file(".")).settings(
     "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % scalazVersion,
     "com.github.japgolly.fork.monocle" %%% "monocle-core" % monocleVersion,
     "com.github.japgolly.fork.monocle" %%% "monocle-macro" % monocleVersion
-  ),
-  bootSnippet := "example.ScalaJSExample().main();"
+  )
 ).jvmSettings(
   Revolver.settings:_*
 ).jvmSettings(

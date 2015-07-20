@@ -1,8 +1,6 @@
-package redgear.scalajs.games.asteroids
+package redgear.scalajs.games.engine
 
 import org.scalajs.dom._
-
-import scala.scalajs.js
 
 /**
  * Created by LordBlackHole on 7/19/2015.

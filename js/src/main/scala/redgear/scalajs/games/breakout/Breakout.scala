@@ -55,7 +55,8 @@ object GameBreakout {
 
   @JSExport
   /** The game window is where all objects are rendered **/
-  def main(window: Canvas): Unit = {
+  def main(windowId: String): Unit = {
+    val window = dom.document.getElementById(windowId).asInstanceOf[Canvas]
 
     /** Drawing context for the window **/
     val drawContext = window.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]

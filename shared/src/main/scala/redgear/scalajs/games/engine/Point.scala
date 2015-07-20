@@ -1,4 +1,4 @@
-package redgear.scalajs.games.asteroids
+package redgear.scalajs.games.engine
 
 /**
  * Created by LordBlackHole on 3/19/2015.
@@ -46,45 +46,5 @@ case class Point(x: Double, y: Double) {
 object Point {
 
   implicit def toPoint(pair: (Double, Double)): Point = Point(pair._1, pair._2)
-
-}
-
-trait Shape {
-
-  def location: Point
-
-  //def intersect(other: Shape): Boolean
-
-}
-
-
-trait Box extends Shape {
-
-  def location: Point
-
-  def size: Point
-
-  def left = location.x
-
-  def top = location.y
-
-  def right = left + size.x
-
-  def bottom = top + size.y
-
-  def width = size.x
-
-  def height = size.y
-
-  def center = location + (size / 2.0)
-
-
-  def intersects(other: Box): Boolean = horizontal(other) && vertical(other)
-
-  def horizontal(other: Box): Boolean = Math.min(right, other.right) - Math.max(left, other.left) > 0
-
-  def vertical(other: Box): Boolean = Math.min(bottom, other.bottom) - Math.max(top, other.top) > 0
-
-  def contains(point: Point): Boolean = left <= point.x && top <= point.y && right >= point.x && bottom >= point.y
 
 }
