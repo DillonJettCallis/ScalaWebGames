@@ -1,5 +1,6 @@
 package redgear.scalajs.games.breakout
 
+import org.scalajs.dom.ext.TouchEvents._
 import org.scalajs.dom
 import org.scalajs.dom.CanvasRenderingContext2D
 import org.scalajs.dom.html._
@@ -74,6 +75,14 @@ object GameBreakout {
     dom.onmouseout = (e: dom.MouseEvent) => mouseIn() = false
 
     dom.onmousemove = (e: dom.MouseEvent) => mouseLoc() = Point(e.pageX, e.pageY)
+
+    dom.document.ontouchstart = (e: dom.TouchEvent) => mouseIn() = true
+    dom.document.ontouchend = (e: dom.TouchEvent) => mouseIn() = true
+
+    dom.document.ontouchmove = (e: dom.TouchEvent) => mouseLoc() = {
+      val touch = e.touches.item(0)
+      Point(touch.pageX, touch.pageY)
+    }
 
     resize()
 

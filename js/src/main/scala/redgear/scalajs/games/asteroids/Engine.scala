@@ -51,8 +51,8 @@ object Engine {
     val scaleX = scale.x
     val scaleY = scale.y
 
-    val width = Var(scaleX)
-    val height = Var(scaleY)
+    val width = Var(scaleX.toInt)
+    val height = Var(scaleY.toInt)
 
     val drawScale = Rx{Point(width() / scaleX, height() / scaleY)}
 
@@ -62,10 +62,10 @@ object Engine {
 
     val keysDown = collection.mutable.Set.empty[Int]
 
-    val resize = () => {width() = dom.innerWidth - 20; height() = dom.innerHeight - 20}
+    val resize = () => {width() = dom.innerWidth; height() = dom.innerHeight}
 
-    Obs(width){window.width = width().toInt}
-    Obs(height){window.height = height().toInt}
+    Obs(width){window.width = width()}
+    Obs(height){window.height = height()}
 
     resize()
 
@@ -77,6 +77,8 @@ object Engine {
     dom.onmouseout = (e: dom.MouseEvent) => mouseIn() = false
 
     dom.onmousemove = (e: dom.MouseEvent) => mouseLoc() = Point(e.pageX, e.pageY)
+
+
 
     def processInput: List[Event] = {
       val keys = (for(id <- keysDown) yield KeyPressEvent(id)).toList
@@ -105,6 +107,12 @@ object Engine {
   object World {
 
     val lensEntities = GenLens[World](_.entities)
+
+  }
+
+  trait GameDefinition {
+
+    def main(window: Canvas): Unit
 
   }
 

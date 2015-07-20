@@ -8,27 +8,29 @@ import spray.http.{MediaTypes, HttpEntity}
 
 object Template {
 
-  val canvasId = "gamespace"
+  def gamePage(main: String) = {
+    val canvasId = "gamespace"
 
-  val txt =
     "<!DOCTYPE html>" +
-    html(
-      head(
-        title("Scala.js Aseroids"),
-        meta(httpEquiv:="Content-Type", content:="text/html; charset=UTF-8"),
-        script(`type`:="text/javascript", src:="/client-fastopt.js"),
-        script(`type`:="text/javascript", src:="//localhost:12345/workbench.js"),
-        link(
-          rel:="stylesheet",
-          `type`:="text/css",
-          href:="META-INF/resources/webjars/bootstrap/3.2.0/css/bootstrap.min.css"
+      html(
+        head(
+          title("Scala.js Aseroids"),
+          meta(httpEquiv := "Content-Type", content := "text/html; charset=UTF-8"),
+          script(`type` := "text/javascript", src := "/client-fastopt.js"),
+          script(`type` := "text/javascript", src := "/workbench.js"),
+          link(
+            rel := "stylesheet",
+            `type` := "text/css",
+            href := "META-INF/resources/webjars/bootstrap/3.2.0/css/bootstrap.min.css"
+          )
+        ),
+        body(margin := 0)(
+          canvas(id := canvasId, display := "block"),
+          script(s"window.onload = function(){$main().main(document.getElementById('$canvasId'))}")
         )
-      ),
-      body(margin:=0)(
-          canvas(id:=canvasId),
-          script(s"window.onload = function(){redgear.scalajs.games.asteroids.GameAsteroids().main(document.getElementById('$canvasId'))}")
       )
-    )
+
+  }
 }
 
 
@@ -37,15 +39,21 @@ object Server extends SimpleRoutingApp {
     implicit val system = ActorSystem()
     startServer("0.0.0.0", port = 8080) {
       get{
-        pathSingleSlash {
+        path("asteroids") {
           complete{
             HttpEntity(
               MediaTypes.`text/html`,
-              Template.txt
+              Template.gamePage("redgear.scalajs.games.asteroids.GameAsteroids")
             )
           }
-        } ~
-        getFromResourceDirectory("")
+        } ~ path("breakout"){
+          complete{
+            HttpEntity(
+              MediaTypes.`text/html`,
+              Template.gamePage("redgear.scalajs.games.breakout.GameBreakout")
+            )
+          }
+        } ~ getFromResourceDirectory("")
       }
     }
   }

@@ -8,6 +8,7 @@ lazy val root = project.enablePlugins(ScalaJSPlugin)
 
 val scalazVersion = "7.1.2"
 val monocleVersion = "1.1.1"
+val scalaJsDomVersion = "0.8.1"
 
 val example = crossProject.in(file(".")).settings(
   name := "ScalaWebGames",
@@ -24,7 +25,7 @@ val example = crossProject.in(file(".")).settings(
 ).jsSettings(
   name := "Client",
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.8.0",
+    "org.scala-js" %%% "scalajs-dom" % scalaJsDomVersion,
     "com.github.japgolly.fork.scalaz" %%% "scalaz-core" % scalazVersion,
     "com.github.japgolly.fork.monocle" %%% "monocle-core" % monocleVersion,
     "com.github.japgolly.fork.monocle" %%% "monocle-macro" % monocleVersion

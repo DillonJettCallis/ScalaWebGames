@@ -16,7 +16,7 @@ import scalaz.State
  *
  */
 @JSExport
-object GameAsteroids {
+object GameAsteroids extends GameDefinition{
 
   val scale = Point(1000, 600)
 
