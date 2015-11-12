@@ -68,7 +68,7 @@ object ClientEngine {
              val input: ClientInputHandler,
              val backgroundColor: String,
              val start: Game => World,
-             val body: WorldState[List[Unit]],
+             val behaviors: List[Behavior],
              val eventHandlers: List[EventHandler],
              val artists: List[Artist]) extends Game {
 
@@ -109,11 +109,17 @@ object ClientEngine {
 
       val start = (game: Game) => World(game, startingEntities)
 
-      val behave: WorldState[List[Unit]] = behaviors.traverse[WorldState, Unit](be => be.update)
-
       val inputHandler = new ClientInputHandler(window, scale)
 
-      new ClientGame(drawContext, inputHandler, backgroundColor, start, behave, eventHandlers, artists)
+      new ClientGame(
+        drawContext = drawContext,
+        input = inputHandler,
+        backgroundColor = backgroundColor,
+        start = start,
+        behaviors = behaviors,
+        eventHandlers = eventHandlers,
+        artists = artists
+      )
     }
 
   }

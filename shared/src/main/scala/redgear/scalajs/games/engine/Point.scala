@@ -41,6 +41,9 @@ case class Point(x: Double, y: Double) {
     Point(cos * x - sin * y, sin * x + cos * y)
   }
 
+  def distanceTo(other: Point) = Math.sqrt((other.x - x) * (other.x - x) + (other.y - y) * (other.y - y))
+
+
 }
 
 object Point {

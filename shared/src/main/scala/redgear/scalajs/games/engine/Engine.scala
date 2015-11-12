@@ -13,8 +13,6 @@ import scalaz.syntax.traverse._
  */
 object Engine {
 
-  type WorldState[A] = State[World, A]
-
   trait GameDefinition {
 
     def main(windowId: String): Unit
@@ -28,8 +26,7 @@ object Engine {
 
   trait Behavior {
 
-    def update: WorldState[Unit]
-
+    def update(world: World): World
 
   }
 
@@ -44,7 +41,7 @@ object Engine {
 
   trait EventHandler {
 
-    def react(event: Event): WorldState[Unit]
+    def react(event: Event, world: World): World
 
   }
 
@@ -60,9 +57,7 @@ object Engine {
 
     def destroyEntity(e: Entity): World = copy(entities = entities.filterNot(_ == e))
 
-    //def replace(previous: Entity,next: Entity) = ???
-
-    def entitiesOf[Type](clazz: Class[Type]): List[Type] = entities.filterNot{clazz == _.getClass}.map(e => e.asInstanceOf[Type])
+    def replaceEntity(previous: Entity, next: Entity) = destroyEntity(previous).createEntity(next)
 
     def announce(event: Event): World = game.announce(event, this)
 
@@ -78,19 +73,19 @@ object Engine {
 
     def input: InputHandler
 
-    def body: WorldState[List[Unit]]
+    def behaviors: List[Behavior]
 
     def eventHandlers: List[EventHandler]
 
     def run(): Unit
 
     def tick(previous: World): World = {
-      val temp = input.processInput.foldLeft(previous)((world, event) => announce(event, world))
-      body.exec(temp)
+      val temp: World = input.processInput.foldLeft(previous)((world, event) => announce(event, world))
+      behaviors.foldLeft(temp)((world, eh) => eh.update(world))
     }
 
     def announce(event: Event, world: World): World = {
-      eventHandlers.traverse[WorldState, Unit](eh => eh.react(event)).exec(world)
+      eventHandlers.foldLeft(world)((world, eh) => eh.react(event, world))
     }
 
 

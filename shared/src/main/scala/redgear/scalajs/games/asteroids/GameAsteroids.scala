@@ -1,7 +1,8 @@
 package redgear.scalajs.games.asteroids
 
+import redgear.scalajs.games.engine.CollisionDetector.{Circle, Triangle}
 import redgear.scalajs.games.engine.Engine._
-import redgear.scalajs.games.engine.Point
+import redgear.scalajs.games.engine.{CollisionDetector, Point}
 
 import scala.util.Random
 import scalaz.State
@@ -45,9 +46,11 @@ case class ShipControlFlags(fireCountDown: Int = 0, turnedFlag: Boolean = false,
 
 object ShipBehavior extends Behavior {
 
-  override def update = State.modify{ world =>
+  override def update(world: World) = {
     World.lensEntities.modify(_.collect {
-      case me: Ship => move(me)
+      case me: Ship =>
+        checkCollide(me, world)
+        move(me)
       case e: Entity => e
     })(world)
   }
@@ -58,6 +61,29 @@ object ShipBehavior extends Behavior {
       controlFlags = ShipControlFlags()
     )
   }
+
+  private def checkCollide(ship: Ship, world: World): Unit = {
+    val points = {
+      val h = 30
+      val w = 20
+
+      List(
+        Point(h / 2, 0),
+        Point(-h / 2, -w / 2),
+        Point(-h / 2, w / 2)
+      )
+    }.map(_.rotate(ship.direction) + ship.location)
+
+    val tri = Triangle(points.head, points(1), points(2))
+
+    val collisions = for (Asteroid(loc, _, size) <- world.entities.toStream)
+      yield CollisionDetector.isColliding(tri, Circle(loc, size))
+
+    val isDead = collisions.exists(identity)
+
+    if(isDead)
+      println("You died!")
+  }
 }
 
 object ShipControlHandler extends EventHandler {
@@ -65,7 +91,7 @@ object ShipControlHandler extends EventHandler {
   val turnArc = 0.1
   val acceleration = Point(0.2, 0)
 
-  override def react(event: Event): WorldState[Unit] = State.modify{ world =>
+  override def react(event: Event, world: World) = {
     event match {
       case KeyPressEvent(65) | KeyPressEvent(37) => turn(world, -turnArc) //A or Left Arrow
       case KeyPressEvent(68) | KeyPressEvent(39) => turn(world, turnArc) //D or Right Arrow
@@ -94,7 +120,7 @@ case class Asteroid(location: Point, velocity: Point, size: Double) extends Enti
 
 object AsteroidBehavior extends Behavior {
 
-  override def update = State.modify{world =>
+  override def update(world: World): World = {
     World.lensEntities.modify(_.collect {
       case me: Asteroid => move(me)
       case e: Entity => e

@@ -46,7 +46,7 @@ val example = crossProject.in(file(".")).settings(
   )
 )
 
-addCompilerPlugin(compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
+//addCompilerPlugin(compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
 
 val exampleJS = example.js
 val exampleJVM = example.jvm.settings(
