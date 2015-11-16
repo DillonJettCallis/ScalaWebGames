@@ -117,8 +117,8 @@ object CollisionDetector {
 
         case (first: Circle, second: Circle) => first.location.distanceTo(second.location) < first.radius + second.radius
 
-        case (first: Circle, second: Polygon) => second.points.exists(first.isInside)
-        case (first: Polygon, second: Circle) => first.points.exists(second.isInside)
+        case (first: Circle, second: Polygon) => second.isInside(first.location) || second.points.exists(first.isInside)
+        case (first: Polygon, second: Circle) => first.isInside(second.location) || first.points.exists(second.isInside)
 
         case (first: Arbitrary, second: Shape) => first.shapes.exists(isColliding(_, second))
         case (first: Shape, second: Arbitrary) => second.shapes.exists(isColliding(_, first))

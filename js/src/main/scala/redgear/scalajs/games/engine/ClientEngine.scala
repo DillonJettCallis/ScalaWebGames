@@ -89,7 +89,6 @@ object ClientEngine {
 
       artists.foreach(_.draw(previous, drawContext, scale))
     }
-
   }
 
   implicit def toClientGameBuilder(shared: GameBuilder): ClientGameBuilder = {
@@ -107,7 +106,7 @@ object ClientEngine {
 
       dom.document.body.appendChild(window)
 
-      val start = (game: Game) => World(game, startingEntities)
+      val start = (game: Game) => World(game, startingEntities.map(e => (e.id, e))(collection.breakOut))
 
       val inputHandler = new ClientInputHandler(window, scale)
 

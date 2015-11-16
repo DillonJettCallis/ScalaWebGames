@@ -62,7 +62,6 @@ object DrawingUtils {
         drawContext.fill()
       }
     }
-
   }
 
 }

@@ -3,6 +3,8 @@ package redgear.scalajs.games.asteroids
 import org.scalajs.dom
 import org.scalajs.dom.CanvasRenderingContext2D
 import org.scalajs.dom.html._
+import redgear.scalajs.games.asteroids.ScoreBoard
+import redgear.scalajs.games.engine.Point
 import redgear.scalajs.games.engine.{DrawingUtils, Point}
 import DrawingUtils._
 import redgear.scalajs.games.engine.ClientEngine._
@@ -25,7 +27,8 @@ object ClientGameAsteroids extends GameDefinition{
 
     val builder: ClientGameBuilder = GameAsteroids.initBuilder
 
-    builder.copy(artists = ShipArtist :: AsteroidArtist :: Nil)
+    builder.copy(artists = AsteroidArtist :: BulletArtist :: ShipArtist :: ShipExplosionArtist :: ScoreArtist :: Nil
+    )
       .buildGame(
         window =          window,
         scale =           GameAsteroids.scale,
@@ -68,5 +71,62 @@ object AsteroidArtist extends Artist {
       }
     }
   }
+}
+
+
+
+object ShipExplosionArtist extends Artist {
+
+  override def draw(world: World, drawContext: CanvasRenderingContext2D, scale: Point): Unit = {
+    for(ShipExplosion(Point(x, y), deathTimer) <- world.entities) {
+      drawContext.fillStyle = deathTimer % 4 match {
+        case 0 => "red"
+        case 1 => "orange"
+        case 2 => "yellow"
+        case 3 => "orange"
+      }
+
+      drawContext.renderPath(scale) {
+        drawContext.arc(x, y, 20 - (deathTimer / 5), 0, js.Math.PI * 2)
+      }
+    }
+  }
+}
+
+object ScoreArtist extends Artist {
+
+  val max = 200
+  val font = "px Georgia"
+  val location = Point(850, 500)
+
+  override def draw(world: World, drawContext: CanvasRenderingContext2D, scale: Point): Unit = {
+    val relative = location * scale
+    drawContext.fillStyle = "white"
+
+    val ScoreBoard(lives, score) = world.entities.find(e => e.isInstanceOf[ScoreBoard]).getOrElse(() => ScoreBoard()).asInstanceOf[ScoreBoard]
+
+    val text = s"Lives: $lives\nScore: $score"
+    val size = 10
+    drawContext.font = s"$size$font"
+    val textScale = drawContext.measureText(text).width
+
+    drawContext.font = s"${size * ((max / textScale) - 0.1) }$font"
+    drawContext.fillText(text, relative.x, relative.y)
+  }
+}
+
+object BulletArtist extends Artist {
+
+  override def draw(world: World, drawContext: CanvasRenderingContext2D, scale: Point): Unit = {
+    drawContext.fillStyle = "white"
+
+    for (Bullet(Point(x, y), _) <- world.entities){
+      drawContext.renderPath(scale) {
+        drawContext.arc(x, y, 2, 0, js.Math.PI * 2)
+      }
+    }
+  }
 
 }
+
+

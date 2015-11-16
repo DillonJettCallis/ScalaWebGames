@@ -2,7 +2,7 @@ package redgear.scalajs.games.engine
 
 import monocle.macros.GenLens
 
-import scala.collection.mutable
+import scala.collection.{GenTraversableOnce, mutable}
 import scalaz._
 import scalaz.std.list._
 import scalaz.syntax.traverse._
@@ -21,6 +21,7 @@ object Engine {
 
   trait Entity {
 
+    val id: Int = World.nextId
 
   }
 
@@ -51,21 +52,30 @@ object Engine {
 
   }
 
-  case class World(private val game: Game, entities: List[Entity] = Nil) {
+  case class World(private val game: Game, entityMap: Map[Int, Entity] = Map()) {
 
-    def createEntity(e: Entity): World = copy(entities = entities :+ e)
+    def entities = entityMap.values
 
-    def destroyEntity(e: Entity): World = copy(entities = entities.filterNot(_ == e))
+    def createEntity(e: Entity): World = copy(entityMap = entityMap + (e.id -> e))
+
+    def destroyEntity(e: Entity): World = copy(entityMap = entityMap - e.id)
 
     def replaceEntity(previous: Entity, next: Entity) = destroyEntity(previous).createEntity(next)
 
     def announce(event: Event): World = game.announce(event, this)
 
+    def fold(func: (World, Entity) => World): World = entities.foldLeft(this)(func)
+
   }
 
   object World {
 
-    val lensEntities = GenLens[World](_.entities)
+    private var idGen = 0
+
+    private[Engine] def nextId = {
+      idGen = idGen + 1
+      idGen
+    }
 
   }
 
