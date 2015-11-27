@@ -3,10 +3,7 @@ package redgear.scalajs.games.asteroids
 import org.scalajs.dom
 import org.scalajs.dom.CanvasRenderingContext2D
 import org.scalajs.dom.html._
-import redgear.scalajs.games.asteroids.ScoreBoard
-import redgear.scalajs.games.engine.Point
-import redgear.scalajs.games.engine.{DrawingUtils, Point}
-import DrawingUtils._
+import redgear.scalajs.games.engine.DrawingUtils._
 import redgear.scalajs.games.engine.ClientEngine._
 import redgear.scalajs.games.engine.Engine._
 import redgear.scalajs.games.engine.Point

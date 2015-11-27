@@ -1,12 +1,5 @@
 package redgear.scalajs.games.engine
 
-import monocle.macros.GenLens
-
-import scala.collection.{GenTraversableOnce, mutable}
-import scalaz._
-import scalaz.std.list._
-import scalaz.syntax.traverse._
-
 /**
  * Created by LordBlackHole on 7/19/2015.
  *
@@ -39,6 +32,8 @@ object Engine {
   }
 
   case class KeyPressEvent(keyId: Int) extends Event
+  case class MouseEvent(in: Boolean, loc: Point) extends Event
+
 
   trait EventHandler {
 
@@ -65,6 +60,19 @@ object Engine {
     def announce(event: Event): World = game.announce(event, this)
 
     def fold(func: (World, Entity) => World): World = entities.foldLeft(this)(func)
+
+    def foldMatch(func: World => PartialFunction[Entity, World]) = {
+      fold{
+        (w: World, e: Entity) => {
+//          val fun: PartialFunction[Entity, World] = func(w).orElse { case _: Entity => w }
+
+          func(w).applyOrElse[Entity, World](x = e, default = (j) => w)
+
+//          fun(e)
+        }
+      }
+
+    }
 
   }
 

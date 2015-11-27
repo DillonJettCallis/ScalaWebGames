@@ -48,6 +48,12 @@ object CollisionDetector {
 
     def isInside(p: Point): Boolean = min < p && max > p
 
+    def |(other: Box): Boolean = horizontal(other) && vertical(other)
+
+    def horizontal(other: Box): Boolean = Math.min(right,other.right) - Math.max(left,other.left) > 0
+
+    def vertical(other: Box): Boolean = Math.min(bottom,other.bottom) - Math.max(top,other.top) > 0
+
   }
   
   case class Triangle(p1: Point, p2: Point, p3: Point) extends Shape with Polygon{

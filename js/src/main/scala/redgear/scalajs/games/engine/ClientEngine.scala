@@ -1,12 +1,10 @@
 package redgear.scalajs.games.engine
 
+import org.scalajs.dom.ext.TouchEvents._
 import org.scalajs.dom
 import org.scalajs.dom.html._
 import redgear.scalajs.games.engine.Engine._
 import rx._
-
-import scalaz.std.list._
-import scalaz.syntax.traverse._
 
 /**
  * Created by LordBlackHole on 7/19/2015.
@@ -53,14 +51,18 @@ object ClientEngine {
 
     dom.onmousemove = (e: dom.MouseEvent) => mouseLoc() = Point(e.pageX, e.pageY)
 
+    dom.document.ontouchstart = (e: dom.TouchEvent) => mouseIn() = true
+    dom.document.ontouchend = (e: dom.TouchEvent) => mouseIn() = true
 
+    dom.document.ontouchmove = (e: dom.TouchEvent) => mouseLoc() = {
+      val touch = e.touches.item(0)
+      Point(touch.pageX, touch.pageY)
+    }
 
     override def processInput: List[Event] = {
-      val keys = (for(id <- keysDown) yield KeyPressEvent(id)).toList
+      val keys = for(id <- keysDown) yield KeyPressEvent(id)
 
-      //TODO: Mouse events, touch events
-
-      keys
+      MouseEvent(mouseIn(), mouseScaleLoc()) ::  keys.toList
     }
   }
 

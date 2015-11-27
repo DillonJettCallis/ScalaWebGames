@@ -71,7 +71,7 @@ object Server extends SimpleRoutingApp {
           complete{
             HttpEntity(
               MediaTypes.`text/html`,
-              Template.gamePage("Scala.js Breakout", "redgear.scalajs.games.breakout.GameBreakout")
+              Template.gamePage("Scala.js Breakout", "redgear.scalajs.games.breakout.ClientGameBreakout")
             )
           }
         } ~ pathSingleSlash {

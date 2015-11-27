@@ -1,6 +1,7 @@
 package redgear.scalajs.games.engine
 
 import org.scalajs.dom._
+import CollisionDetector.Box
 
 /**
  * Created by LordBlackHole on 7/19/2015.
@@ -26,6 +27,10 @@ object DrawingUtils {
     def translateAndScale(scale: Point): Unit = {
       this.translate(scale)
       this.scale(scale)
+    }
+
+    def fillBox(box: Box): Unit = {
+      drawContext.fillRect(box.left, box.top, box.width, box.height)
     }
 
     def render(scale: Point)(renderFunc: => Unit): Unit = {

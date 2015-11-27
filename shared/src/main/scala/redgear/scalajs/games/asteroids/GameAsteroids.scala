@@ -151,20 +151,18 @@ object AsteroidBehavior extends Behavior {
   }
 }
 
-case class ShipExplosion(location: Point, deathTimer: Int = 50) extends Entity
+case class ShipExplosion(location: Point, deathTimer: Int = 30) extends Entity
 
 object ShipExplosionBehavior extends Behavior {
 
-  override def update(world: World): World = {
-
-   world.fold { (w, e) =>
-     e match {
-       case explosion: ShipExplosion if explosion.deathTimer == 0 => w.replaceEntity(explosion, Ship())
-       case explosion: ShipExplosion => w.replaceEntity(explosion, explosion.copy(deathTimer = explosion.deathTimer - 1))
-       case e: Entity => w
-     }
+  override def update(world: World): World =
+   world.foldMatch{ w => {
+     case explosion: ShipExplosion if explosion.deathTimer == 0 => w.replaceEntity(explosion, Ship())
+     case explosion: ShipExplosion => w.replaceEntity(explosion, explosion.copy(deathTimer = explosion.deathTimer - 1))
+     case e: Entity => w
+    }
    }
-  }
+
 }
 
 object ShipDeathExplosionEventHandler extends EventHandler {
